@@ -1,9 +1,21 @@
+import { useAuth } from "@clerk/expo";
 import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Redirect, router } from "expo-router";
 
 import { images } from "../../constants/images";
 
 export default function OnboardingScreen() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (isSignedIn) {
+    return <Redirect href="/" />;
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <View className="flex-1 bg-white px-7">
@@ -62,7 +74,10 @@ export default function OnboardingScreen() {
           </View>
         </View>
 
-        <Pressable className="mb-7 h-[72px] items-center justify-center rounded-[24px] bg-lingua-purple">
+        <Pressable
+          className="mb-7 h-[72px] items-center justify-center rounded-[24px] bg-lingua-purple"
+          onPress={() => router.push("./sign-up")}
+        >
           <View className="flex-row items-center gap-4">
             <Text className="font-poppins-semibold text-[23px] leading-[28px] text-white">
               Get Started
