@@ -7,11 +7,16 @@ import { router } from "expo-router";
 import { images } from "../../constants/images";
 import { languages } from "../../data/languages";
 import { LanguageCard } from "../components/language-card";
+import { useLanguageStore } from "../store/language-store";
 import type { LanguageCode } from "../../types/learning";
 
 export default function LanguageSelectionScreen() {
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<LanguageCode>(languages[0].id);
+  const selectedLanguageId = useLanguageStore((state) => state.selectedLanguageId);
+  const setSelectedLanguageId = useLanguageStore((state) => state.setSelectedLanguageId);
+  const [selectedId, setSelectedId] = useState<LanguageCode>(
+    selectedLanguageId ?? languages[0].id
+  );
 
   const filteredLanguages = languages.filter((language) => {
     const search = query.trim().toLowerCase();
@@ -23,6 +28,8 @@ export default function LanguageSelectionScreen() {
   });
 
   const handleConfirm = () => {
+    setSelectedLanguageId(selectedId);
+
     if (router.canGoBack()) {
       router.back();
       return;
