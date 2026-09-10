@@ -19,6 +19,7 @@ export interface Unit {
   description: string;
   color: string;
   icon: string;
+  imageUrl: string;
 }
 
 export type ActivityType =

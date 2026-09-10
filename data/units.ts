@@ -9,6 +9,7 @@ export const units: Unit[] = [
     description: "Greetings and introducing yourself",
     color: "#6C4EF5",
     icon: "👋",
+    imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80",
   },
   {
     id: "fr-unit-1",
@@ -18,6 +19,7 @@ export const units: Unit[] = [
     description: "Greetings and introducing yourself",
     color: "#4D8BFF",
     icon: "👋",
+    imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&q=80",
   },
   {
     id: "it-unit-1",
@@ -27,6 +29,7 @@ export const units: Unit[] = [
     description: "Greetings and introducing yourself",
     color: "#21C16B",
     icon: "👋",
+    imageUrl: "https://images.unsplash.com/photo-1513258496099-48168024aec0?w=800&q=80",
   },
 ];
 

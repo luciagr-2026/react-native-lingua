@@ -14,4 +14,6 @@ export const images = {
   palace,
   streakFire,
   treasure,
+  // Reused as the AI teacher's on-screen avatar in the audio lesson call.
+  aiTeacher: mascotWelcome,
 } as const;
