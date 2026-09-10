@@ -9,6 +9,7 @@ import { languages } from "../../data/languages";
 import { LanguageCard } from "../components/language-card";
 import { useLanguageStore } from "../store/language-store";
 import type { LanguageCode } from "../../types/learning";
+import { posthog } from "../lib/posthog";
 
 export default function LanguageSelectionScreen() {
   const [query, setQuery] = useState("");
@@ -29,6 +30,7 @@ export default function LanguageSelectionScreen() {
 
   const handleConfirm = () => {
     setSelectedLanguageId(selectedId);
+    posthog?.capture("language_selected", { language_code: selectedId });
 
     if (router.canGoBack()) {
       router.back();
