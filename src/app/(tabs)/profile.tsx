@@ -4,6 +4,7 @@ import { Pressable, Text } from "react-native";
 
 import { PlaceholderScreen } from "../../components/placeholder-screen";
 import { useLanguageStore } from "../../store/language-store";
+import { posthog } from "../../lib/posthog";
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
@@ -15,6 +16,11 @@ export default function ProfileScreen() {
     clearSelectedLanguageId();
   };
 
+  const handleSignOut = async () => {
+    posthog?.capture("user_signed_out");
+    await signOut();
+  };
+
   return (
     <PlaceholderScreen
       description={`Signed in as ${user?.firstName ?? user?.primaryEmailAddress?.emailAddress ?? "you"}. Settings and stats will live here.`}
@@ -22,7 +28,7 @@ export default function ProfileScreen() {
     >
       <Pressable
         className="mt-4 h-[52px] items-center justify-center rounded-[16px] bg-lingua-purple px-8"
-        onPress={() => signOut()}
+        onPress={handleSignOut}
       >
         <Text className="font-poppins-semibold text-[17px] text-white">Sign out</Text>
       </Pressable>

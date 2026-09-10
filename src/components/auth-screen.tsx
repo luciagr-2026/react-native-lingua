@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, router } from "expo-router";
 
 import { images } from "../../constants/images";
+import { posthog } from "../lib/posthog";
 
 type AuthScreenProps = {
   mode: "sign-in" | "sign-up";
@@ -167,6 +168,10 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
       if (signUp.status === "complete") {
         await signUp.finalize({ navigate: navigateAfterAuth });
+        posthog?.capture("authentication_completed", {
+          authentication_method: "password",
+          authentication_mode: "sign_up",
+        });
         return;
       }
 
@@ -192,6 +197,10 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
     if (signIn.status === "complete") {
       await signIn.finalize({ navigate: navigateAfterAuth });
+      posthog?.capture("authentication_completed", {
+        authentication_method: "password",
+        authentication_mode: "sign_in",
+      });
     }
   };
 
@@ -205,6 +214,11 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
     if (signUp.status === "complete") {
       await signUp.finalize({ navigate: navigateAfterAuth });
+      posthog?.capture("email_verification_completed");
+      posthog?.capture("authentication_completed", {
+        authentication_method: "password",
+        authentication_mode: "sign_up",
+      });
     }
   };
 
@@ -219,6 +233,11 @@ export function AuthScreen({ mode }: AuthScreenProps) {
       const { createdSessionId, setActive } = await startSSOFlow({ strategy });
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
+        posthog?.capture("authentication_completed", {
+          authentication_method: "social",
+          authentication_mode: mode,
+          authentication_provider: strategy.replace("oauth_", ""),
+        });
         router.replace("/" as Href);
       }
     } catch {

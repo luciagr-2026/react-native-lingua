@@ -1,10 +1,14 @@
-import { ClerkProvider } from "@clerk/expo";
+import { ClerkProvider, useAuth, useUser } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import "../../global.css";
 
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { Text, View } from "react-native";
+import { PostHogErrorBoundary, PostHogProvider } from "posthog-react-native";
+import { useEffect, useRef } from "react";
+
+import { posthog } from "../lib/posthog";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
 
@@ -13,6 +17,51 @@ if (!publishableKey) {
 }
 
 void SplashScreen.preventAutoHideAsync();
+
+function RootErrorFallback() {
+  return (
+    <View>
+      <Text>Something went wrong. Please restart the app.</Text>
+    </View>
+  );
+}
+
+function PostHogIdentity() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
+  const identifiedUserId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    if (!isSignedIn || !user) {
+      if (identifiedUserId.current) {
+        posthog?.reset();
+        identifiedUserId.current = null;
+      }
+      return;
+    }
+
+    if (identifiedUserId.current === user.id) {
+      return;
+    }
+
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+    const personProperties = {
+      ...(user.primaryEmailAddress?.emailAddress
+        ? { email: user.primaryEmailAddress.emailAddress }
+        : {}),
+      ...(fullName ? { name: fullName } : {}),
+    };
+
+    posthog?.identify(user.id, { $set: personProperties });
+    identifiedUserId.current = user.id;
+  }, [isLoaded, isSignedIn, user]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -32,9 +81,20 @@ export default function RootLayout() {
     return null;
   }
 
+  const routes = <Stack screenOptions={{ headerShown: false }} />;
+
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Stack screenOptions={{ headerShown: false }} />
+      {posthog ? (
+        <PostHogProvider client={posthog}>
+          <PostHogIdentity />
+          <PostHogErrorBoundary fallback={RootErrorFallback}>
+            {routes}
+          </PostHogErrorBoundary>
+        </PostHogProvider>
+      ) : (
+        routes
+      )}
     </ClerkProvider>
   );
 }
